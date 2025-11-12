@@ -14,74 +14,18 @@ import (
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
 	"google.golang.org/genai"
-		
-	"github.com/joho/godotenv" // Add this import for .env support
-
+	
+	"github.com/Fahlevi20/go-adk-agent/function_calling" // Use your local module name
+	"github.com/joho/godotenv"
 )
 
-// BmiCalculatorArgs defines the schema for the arguments passed to the bmi_calculator tool.
-type BmiCalculatorArgs struct {
-	Weight float64 `json:"weight" jsonschema:"Weight in kilograms"`
-	Height float64 `json:"height" jsonschema:"Height in meters"`
-}
-
-// BmiCalculatorResult defines the output schema for the bmi_calculator tool.
-type BmiCalculatorResult struct {
-	BMI      float64 `json:"bmi"`
-	Category string  `json:"category"`
-	Message  string  `json:"message"`
-}
-
-// CalculateBMI is a tool that calculates BMI based on weight and height.
-// Note: Uses tool.Context instead of context.Context like in the reference example
-func CalculateBMI(ctx tool.Context, input BmiCalculatorArgs) BmiCalculatorResult {
-	if input.Height <= 0 {
-		return BmiCalculatorResult{
-			BMI:      0,
-			Category: "Error",
-			Message:  "Height must be greater than 0",
-		}
-	}
-	if input.Weight <= 0 {
-		return BmiCalculatorResult{
-			BMI:      0,
-			Category: "Error", 
-			Message:  "Weight must be greater than 0",
-		}
-	}
-
-	calculatedBmi := input.Weight / (input.Height * input.Height)
-	category := getBMICategory(calculatedBmi)
-	
-	fmt.Printf("Tool: Calculated BMI for weight %.1f kg and height %.2f m: %.1f (%s)\n", 
-		input.Weight, input.Height, calculatedBmi, category)
-		
-	return BmiCalculatorResult{
-		BMI:      calculatedBmi,
-		Category: category,
-		Message:  fmt.Sprintf("The BMI is %.1f (%s)", calculatedBmi, category),
-	}
-}
-
-func getBMICategory(bmi float64) string {
-	switch {
-	case bmi < 18.5:
-		return "Underweight"
-	case bmi < 25:
-		return "Normal weight"
-	case bmi < 30:
-		return "Overweight"
-	default:
-		return "Obese"
-	}
-}
-
 func main() {
-		// Check if API key is set
+	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("No .env file found, proceeding to check environment variables")
 	}
+	
 	ctx := context.Background()
 
 	apiKey := os.Getenv("GOOGLE_API_KEY")
@@ -102,13 +46,13 @@ func main() {
 	
 	fmt.Println("🔄 Creating agent...")
 	
-	// Create BMI tool using functiontool.New() - exactly like the reference
+	// Create BMI tool using functiontool.New()
 	bmiTool, err := functiontool.New(
 		functiontool.Config{
 			Name:        "bmi_calculator",
 			Description: "Calculates BMI (Body Mass Index) based on weight (kg) and height (m).",
 		},
-		CalculateBMI, // Our function that uses tool.Context
+		function_calling.CalculateBMI,
 	)
 	if err != nil {
 		log.Fatalf("❌ Failed to create BMI tool: %v", err)
