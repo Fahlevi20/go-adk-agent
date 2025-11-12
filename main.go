@@ -89,7 +89,7 @@ func main() {
 		log.Fatal("GOOGLE_API_KEY environment variable is not set")
 	}
 
-	model, err := gemini.NewModel(ctx, "gemini-2.0-flash-exp", &genai.ClientConfig{
+	model, err := gemini.NewModel(ctx, "gemini-2.0-flash", &genai.ClientConfig{
 		APIKey: apiKey,
 	})
 	
