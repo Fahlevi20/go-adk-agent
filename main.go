@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import ("fmt"
+"github.com/Fahlevi20/go-adk-agent/tools"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	bmi:=tools.BmiCalculator(70,1.75)
+	fmt.Println("BMI Result:",bmi)
+	fmt.Println("BMI Calculated")
 }
